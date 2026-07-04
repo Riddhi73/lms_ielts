@@ -17,19 +17,21 @@ import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
-interface TitleFormProps {
-  initialData: { title: string };
+interface DescriptionFormProps {
+  initialData: { description: string };
   courseId: string;
 }
 
 const formSchema = z.object({
   title: z.string().min(1, {
-    message: "Title is required",
+    message: "Description is required",
   }),
 });
 
-const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
+const DescriptionForm = ({ initialData, courseId }: DescriptionFormProps) => {
   const [isEditing, setEditing] = useState(false);
   const router = useRouter();
   const toggleEdit = () => setEditing((current) => !current);
@@ -52,19 +54,28 @@ const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Course title
+        Course description
         <Button onClick={toggleEdit} variant="ghost">
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit title
+              Edit description
             </>
           )}
         </Button>
       </div>
-      {!isEditing && <p className="text-sm mt-2">{initialData.title}</p>}
+      {!isEditing && (
+        <p
+          className={cn(
+            "text-sm mt-2",
+            !initialData.description && "text-slate-500 italic",
+          )}
+        >
+          {initialData.description || "No Description"}
+        </p>
+      )}
       {isEditing && (
         <Form {...form}>
           <form
@@ -73,13 +84,13 @@ const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
           >
             <FormField
               control={form.control}
-              name="title"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <Textarea
                       disabled={isSubmitting}
-                      placeholder="e.g 'Advanced Web Development'"
+                      placeholder="e.g 'This course is about...'"
                       {...field}
                     />
                   </FormControl>
@@ -99,4 +110,4 @@ const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
   );
 };
 
-export default TitleForm;
+export default DescriptionForm;
