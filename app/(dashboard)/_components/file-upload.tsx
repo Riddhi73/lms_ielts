@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useDropzone } from "@uploadthing/react";
 import { useUploadThing } from "@/lib/uploadthing";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
@@ -11,8 +11,50 @@ interface FileUploadProps {
   endpoint: keyof typeof ourFileRouter;
 }
 
+// 🔴 CHANGED: Removed 'as const' from the entire object
+const endpointConfig = {
+  courseImage: {
+    // 🔴 CHANGED: Added 'as string[]' to make array mutable (not readonly)
+    accept: {
+      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"] as string[],
+    },
+    maxSize: 4 * 1024 * 1024,
+    maxFiles: 1,
+    label: "image",
+    subtext: "16:9 aspect ratio recommended",
+    dropText: "Drop the image here...",
+  },
+  courseAttachment: {
+    accept: {
+      // 🔴 CHANGED: Added 'as string[]' on every array
+      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"] as string[],
+      "application/pdf": [".pdf"] as string[],
+      "text/*": [".txt", ".doc", ".docx"] as string[],
+      "video/*": [".mp4", ".mov", ".avi"] as string[],
+      "audio/*": [".mp3", ".wav", ".aac"] as string[],
+    },
+    maxSize: 16 * 1024 * 1024,
+    maxFiles: 1,
+    label: "file",
+    subtext: "Add anything your students need to complete the course",
+    dropText: "Drop the file here...",
+  },
+  chapterVideo: {
+    // 🔴 CHANGED: Added 'as string[]'
+    accept: { "video/*": [".mp4", ".mov", ".avi", ".mkv"] as string[] },
+    maxSize: 512 * 1024 * 1024,
+    maxFiles: 1,
+    label: "video",
+    subtext: "Max 512MB",
+    dropText: "Drop the video here...",
+  },
+  // 🔴 REMOVED: 'as const' that was here before
+};
+
 export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
+
+  const config = endpointConfig[endpoint];
 
   const { startUpload } = useUploadThing(endpoint, {
     onClientUploadComplete: (res) => {
@@ -38,11 +80,9 @@ export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
         startUpload(acceptedFiles);
       }
     },
-    accept: {
-      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
-    },
-    maxFiles: 1,
-    maxSize: 4 * 1024 * 1024, // 4MB
+    accept: config.accept, // 🔴 This now works because arrays are mutable string[]
+    maxFiles: config.maxFiles,
+    maxSize: config.maxSize,
   });
 
   return (
@@ -69,18 +109,26 @@ export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
 
         <p className="text-center text-sm font-medium text-blue-600">
           {isDragActive
-            ? "Drop the image here..."
+            ? config.dropText
             : isUploading
               ? "Uploading..."
               : "Choose files or drag and drop"}
         </p>
 
-        <p className="text-xs text-gray-500">image (4MB)</p>
+        <p className="text-xs text-gray-500">
+          {config.label} ({formatFileSize(config.maxSize)})
+        </p>
       </div>
 
-      <p className="mt-2 text-xs text-gray-500">
-        16:9 aspect ratio recommended
-      </p>
+      <p className="mt-2 text-xs text-gray-500">{config.subtext}</p>
     </div>
   );
 };
+
+function formatFileSize(bytes: number): string {
+  if (bytes >= 1024 * 1024 * 1024)
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(0)}GB`;
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(0)}MB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(0)}KB`;
+  return `${bytes}B`;
+}

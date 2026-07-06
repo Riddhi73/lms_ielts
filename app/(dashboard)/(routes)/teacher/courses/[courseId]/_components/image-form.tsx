@@ -82,9 +82,6 @@ export default function ImageForm({ initialData, courseId }: ImageFormProps) {
               }
             }}
           />
-          <div className="text-xs text-muted-foreground mt-4">
-            16:9 aspect ratio recommended
-          </div>
         </div>
       )}
     </div>
