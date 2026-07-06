@@ -1,85 +1,86 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { uploadFiles } from "@/lib/uploadthing";
-import { UploadCloud, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useDropzone } from "@uploadthing/react";
+import { useUploadThing } from "@/lib/uploadthing";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
+import toast from "react-hot-toast";
 
 interface FileUploadProps {
   onChange: (url?: string) => void;
-  endpoint: "courseImage" | "courseAttachment" | "chapterVideo";
+  endpoint: keyof typeof ourFileRouter;
 }
 
-export default function FileUpload({ onChange, endpoint }: FileUploadProps) {
+export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
-  const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      if (acceptedFiles.length === 0) return;
-
-      setIsUploading(true);
-      try {
-        const res = await uploadFiles(endpoint, {
-          files: acceptedFiles,
-        });
-
-        const url = res[0]?.url;
-        if (url) {
-          onChange(url);
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
-      } finally {
-        setIsUploading(false);
-      }
+  const { startUpload } = useUploadThing(endpoint, {
+    onClientUploadComplete: (res) => {
+      console.log("Upload complete:", res);
+      onChange(res?.[0]?.ufsUrl);
+      setIsUploading(false);
     },
-    [endpoint, onChange],
-  );
+    onUploadError: (error) => {
+      console.error("Upload error:", error);
+      toast.error(error.message);
+      setIsUploading(false);
+    },
+    onUploadBegin: (name) => {
+      console.log("Upload started:", name);
+      setIsUploading(true);
+    },
+  });
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { "image/*": [".png", ".jpg", ".jpeg", ".webp"] },
-    disabled: isUploading,
-    multiple: false,
+    onDrop: (acceptedFiles) => {
+      console.log("Files dropped:", acceptedFiles);
+      if (acceptedFiles.length > 0) {
+        startUpload(acceptedFiles);
+      }
+    },
+    accept: {
+      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+    },
+    maxFiles: 1,
+    maxSize: 4 * 1024 * 1024, // 4MB
   });
 
   return (
-    <div
-      {...getRootProps()}
-      className={cn(
-        "flex flex-col items-center justify-center w-full min-h-40 rounded-xl border-2 border-dashed p-6 gap-3 cursor-pointer transition-colors",
-        isDragActive
-          ? "border-primary bg-primary/5"
-          : "border-border bg-card hover:bg-accent/30 hover:border-primary/50",
-        isUploading && "opacity-50 pointer-events-none",
-      )}
-    >
-      <input {...getInputProps()} />
+    <div className="w-full">
+      <div
+        {...getRootProps()}
+        className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-slate-100 px-6 py-10 hover:bg-slate-200 transition-colors"
+      >
+        <input {...getInputProps()} />
 
-      {isUploading ? (
-        <>
-          <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
-          <p className="text-sm font-medium text-foreground">Uploading...</p>
-        </>
-      ) : (
-        <>
-          <div className="p-2.5 rounded-full bg-primary/10">
-            <UploadCloud
-              className={cn(
-                "h-6 w-6 transition-colors",
-                isDragActive ? "text-primary" : "text-muted-foreground",
-              )}
-            />
-          </div>
-          <div className="flex flex-col items-center gap-1 text-center">
-            <p className="text-sm font-medium text-foreground">
-              {isDragActive ? "Drop it here" : "Drag & drop your image"}
-            </p>
-            <p className="text-xs text-muted-foreground">or click to browse</p>
-          </div>
-        </>
-      )}
+        <svg
+          className="mb-3 h-10 w-10 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+          />
+        </svg>
+
+        <p className="text-center text-sm font-medium text-blue-600">
+          {isDragActive
+            ? "Drop the image here..."
+            : isUploading
+              ? "Uploading..."
+              : "Choose files or drag and drop"}
+        </p>
+
+        <p className="text-xs text-gray-500">image (4MB)</p>
+      </div>
+
+      <p className="mt-2 text-xs text-gray-500">
+        16:9 aspect ratio recommended
+      </p>
     </div>
   );
-}
+};
