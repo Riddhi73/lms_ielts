@@ -9,13 +9,16 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
-import { Badge, Grip, Pencil } from "lucide-react";
+import { Grip, Pencil } from "lucide-react";
+// 🔴 ADDED: Import Badge from your UI components, not lucide-react
+import { Badge } from "@/components/ui/badge";
 
 interface ChaptersListProps {
   items: Chapter[];
   onReorder: (updateData: { id: string; position: number }[]) => void;
   onEdit: (id: string) => void;
 }
+
 export const ChaptersList = ({
   items,
   onReorder,
@@ -26,7 +29,7 @@ export const ChaptersList = ({
 
   useEffect(() => {
     setIsMounted(true);
-  });
+  }, []); // 🔴 ADDED: Empty dependency array to run only once on mount
 
   useEffect(() => {
     setChapters(items);
@@ -34,23 +37,25 @@ export const ChaptersList = ({
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
+
     const items = Array.from(chapters);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    const startIndex = Math.min(result.source.index, result.destination.index);
-    const endIndex = Math.max(result.source.index, result.destination.index);
-    const updatedChapters = items.slice(startIndex, endIndex);
-    setChapters(items);
-    const bulkUpdateData = updatedChapters.map((chapter) => ({
+
+    // 🔴 CHANGED: Calculate positions for ALL chapters, not just the moved range
+    const bulkUpdateData = items.map((chapter, index) => ({
       id: chapter.id,
-      position: items.findIndex((item) => item.id === chapter.id),
+      position: index, // Position is just the array index (0-based)
     }));
+
+    setChapters(items);
     onReorder(bulkUpdateData);
   };
 
   if (!isMounted) {
     return null;
   }
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="chapters">
