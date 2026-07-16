@@ -22,7 +22,6 @@ const ChapterIdPage = async ({
     return redirect("/");
   }
 
-  // 🔴 CHANGED: Await params once and reuse
   const { courseId, chapterId } = await params;
 
   const chapter = await db.chapter.findUnique({
