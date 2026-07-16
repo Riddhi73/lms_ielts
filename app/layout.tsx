@@ -4,6 +4,7 @@ import { Inter, Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import ToastProvider from "./(dashboard)/_components/providers/toaster-provider";
+import { ConfettiProvider } from "./(dashboard)/_components/providers/confetti-provider";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
     <ClerkProvider afterSignOutUrl="/">
       <html lang="en" className={cn("font-sans", geist.variable)}>
         <body className={inter.className}>
+          <ConfettiProvider />
           <ToastProvider />
           {children}
         </body>
