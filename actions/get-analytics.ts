@@ -1,9 +1,8 @@
 import { db } from "@/lib/db";
-import { Course, Purchase } from "@prisma/client";
 
-type PurchaseWithCourse = Purchase & {
-  course: Course;
-};
+type PurchaseWithCourse = Awaited<
+  ReturnType<typeof db.purchase.findMany<{ include: { course: true } }>>
+>[number];
 
 const groupByCourse = (purchases: PurchaseWithCourse[]) => {
   const grouped: { [courseTitle: string]: number } = {};
@@ -37,7 +36,7 @@ export const getAnalytics = async (userId: string) => {
       ([courseTitle, total]) => ({
         name: courseTitle,
         total: total,
-      })
+      }),
     );
 
     const totalRevenue = data.reduce((acc, curr) => acc + curr.total, 0);
