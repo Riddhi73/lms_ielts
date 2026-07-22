@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
+import type { Course, Purchase } from "@prisma/client";
 
-type PurchaseWithCourse = Awaited<
-  ReturnType<typeof db.purchase.findMany<{ include: { course: true } }>>
->[number];
+type PurchaseWithCourse = Purchase & {
+  course: Course;
+};
 
 const groupByCourse = (purchases: PurchaseWithCourse[]) => {
   const grouped: { [courseTitle: string]: number } = {};
