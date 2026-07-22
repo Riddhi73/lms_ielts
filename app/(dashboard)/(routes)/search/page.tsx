@@ -1,3 +1,4 @@
+// app/(dashboard)/(routes)/search/page.tsx
 import { Suspense } from "react";
 import { db } from "@/lib/db";
 import { Categories } from "./_components/categories";
@@ -24,9 +25,7 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
   const { title, categoryId } = await searchParams;
 
   const categories = await db.category.findMany({
-    orderBy: {
-      name: "asc",
-    },
+    orderBy: { name: "asc" },
   });
 
   const courses = await getCourse({ userId, title, categoryId });
@@ -34,12 +33,14 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
   return (
     <>
       <div className="px-6 pt-6 md:hidden md:mb-0 block">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>Loading search...</div>}>
           <SearchInput />
         </Suspense>
       </div>
       <div className="p-6 space-y-4">
-        <Categories items={categories} />
+        <Suspense fallback={<div>Loading categories...</div>}>
+          <Categories items={categories} />
+        </Suspense>
         <CoursesList items={courses} />
       </div>
     </>
