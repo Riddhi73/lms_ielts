@@ -1,6 +1,6 @@
 "use client";
 
-import { NavbarRoutes } from "../navbar-routes";
+import NavbarRoutes from "../navbar-routes";
 import { MobileSidebar } from "./mobile-sidebar";
 
 export const Navbar = () => {
