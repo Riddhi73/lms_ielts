@@ -1,12 +1,11 @@
 // app/(dashboard)/(routes)/search/page.tsx
-import { Suspense } from "react";
 import { db } from "@/lib/db";
 import { Categories } from "./_components/categories";
-import { SearchInput } from "../../_components/search-input";
 import { getCourse } from "@/actions/get-courses";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CoursesList } from "@/components/courses-list";
+import { SearchInputSuspense } from "../../_components/search-input-wrapper";
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -33,14 +32,10 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
   return (
     <>
       <div className="px-6 pt-6 md:hidden md:mb-0 block">
-        <Suspense fallback={<div>Loading search...</div>}>
-          <SearchInput />
-        </Suspense>
+        <SearchInputSuspense />
       </div>
       <div className="p-6 space-y-4">
-        <Suspense fallback={<div>Loading categories...</div>}>
-          <Categories items={categories} />
-        </Suspense>
+        <Categories items={categories} />
         <CoursesList items={courses} />
       </div>
     </>

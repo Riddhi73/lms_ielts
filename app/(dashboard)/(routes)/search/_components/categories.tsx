@@ -1,3 +1,4 @@
+// categories.tsx
 "use client";
 
 import { Category } from "@prisma/client";
@@ -11,12 +12,13 @@ import {
   FcSalesPerformance,
   FcSportsMode,
 } from "react-icons/fc";
-import { CategoryItem } from "./category-item";
+import { CategoryItemSuspense } from "./category-item-wrapper";
+
 interface CategoriesProps {
   items: Category[];
 }
 
-const iconMap: Record<Category["name"], IconType> = {
+const iconMap: Record<string, IconType> = {
   "Computer Science": FcMultipleDevices,
   Music: FcMusic,
   Fitness: FcSportsMode,
@@ -31,7 +33,7 @@ export const Categories = ({ items }: CategoriesProps) => {
   return (
     <div className="flex items-center gap-x-2 overflow-x-auto pb-2">
       {items.map((item) => (
-        <CategoryItem
+        <CategoryItemSuspense
           key={item.id}
           label={item.name}
           icon={iconMap[item.name]}
