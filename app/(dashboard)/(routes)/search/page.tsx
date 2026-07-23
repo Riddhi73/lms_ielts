@@ -8,6 +8,9 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CoursesList } from "@/components/courses-list";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface SearchPageProps {
   searchParams: Promise<{
     title: string;
