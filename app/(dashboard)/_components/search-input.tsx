@@ -1,3 +1,4 @@
+// app/(dashboard)/_components/search-input.tsx
 "use client";
 
 import { Search } from "lucide-react";
@@ -12,10 +13,10 @@ export const SearchInput = () => {
   const debounceValue = useDebounce(value);
 
   const searchParam = useSearchParams();
-
   const router = useRouter();
   const pathname = usePathname();
   const currentCategoryId = searchParam.get("categoryId");
+
   useEffect(() => {
     const url = qs.stringifyUrl(
       {
@@ -32,13 +33,14 @@ export const SearchInput = () => {
     );
     router.push(url);
   }, [debounceValue, currentCategoryId, router, pathname]);
+
   return (
     <div className="relative">
       <Search className="w-4 h-4 absolute top-3 left-3 text-slate-500" />
       <Input
         onChange={(e) => setValue(e.target.value)}
         value={value}
-        className="w-full md:w=[300px] pl-9 rounded-full bg-slate-100 focus-visible:ring-slate-200"
+        className="w-full md:w-75 pl-9 rounded-full bg-slate-100 focus-visible:ring-slate-200"
         placeholder="Search for a course"
       />
     </div>

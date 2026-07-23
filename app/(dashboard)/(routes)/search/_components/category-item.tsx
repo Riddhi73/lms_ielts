@@ -10,6 +10,7 @@ interface CategoryItemProps {
   value?: string;
   icon?: IconType;
 }
+
 export const CategoryItem = ({
   label,
   value,
@@ -21,6 +22,7 @@ export const CategoryItem = ({
   const currentCategoryId = searchParams.get("categoryId");
   const currentTitle = searchParams.get("title");
   const isSelected = currentCategoryId === value;
+
   const onClick = () => {
     const url = qs.stringifyUrl(
       {
@@ -34,6 +36,7 @@ export const CategoryItem = ({
     );
     router.push(url);
   };
+
   return (
     <button
       onClick={onClick}
